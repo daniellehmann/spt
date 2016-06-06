@@ -30,6 +30,7 @@ import org.metaborg.util.log.ILogger;
 import org.metaborg.util.log.LoggerUtils;
 import org.metaborg.util.resource.FileSelectorUtils;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
@@ -57,10 +58,13 @@ public class Runner {
     }
 
 
-    public void run(String sptPath, String lutPath, List<String> languagePaths, String testsPath, String startSymbol)
+    public void run(String sptPath, List<String> lutPaths, List<String> languagePaths, String testsPath, String startSymbol)
         throws MetaborgException, FileSystemException {
         final FileObject sptLocation = resourceService.resolve(sptPath);
-        final FileObject lutLocation = resourceService.resolve(lutPath);
+        final List<FileObject> lutLocations = Lists.newLinkedList();
+        for(String lutPath : lutPaths) {
+            lutLocations.add(resourceService.resolve(lutPath));
+        }
         final List<FileObject> languageLocations = Lists.newLinkedList();
         for(String languagePath : languagePaths) {
             languageLocations.add(resourceService.resolve(languagePath));
@@ -73,8 +77,11 @@ public class Runner {
                 languageDiscoveryService.discover(languageDiscoveryService.request(sptLocation));
             final ILanguageImpl spt = LanguageUtils.toImpls(sptComponents).iterator().next();
             // get LUT
-            Iterable<ILanguageComponent> lutComponents =
-                languageDiscoveryService.discover(languageDiscoveryService.request(lutLocation));
+            final List<ILanguageComponent> lutComponents = Lists.newLinkedList();
+            for (FileObject lutLocation : lutLocations) {
+                Iterables.addAll(lutComponents,
+                    languageDiscoveryService.discover(languageDiscoveryService.request(lutLocation)));
+            }
             final ILanguageImpl lut = LanguageUtils.toImpls(lutComponents).iterator().next();
             // load any extra languages
             for(FileObject languageLocation : languageLocations) {

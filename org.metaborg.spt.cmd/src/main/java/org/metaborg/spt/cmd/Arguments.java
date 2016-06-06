@@ -12,8 +12,8 @@ public class Arguments {
         help = true) public boolean help;
 
 
-    @Parameter(names = { "--lut", "-l" }, description = "Location of the language under test",
-        required = true) public String lutLocation;
+    @Parameter(names = { "--lut", "-l" }, description = "Location of (possibly multiple components of) the language under test",
+        required = true) public List<String> lutLocations;
 
     @Parameter(names = { "--spt", "-s" }, description = "Location of the SPT language",
         required = true) public String sptLocation;
